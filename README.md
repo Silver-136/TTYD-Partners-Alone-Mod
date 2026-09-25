@@ -2,7 +2,7 @@ This patch is an upgraded/complete version of a previous Partner Only patch that
 begining to end without any need for uninstalling, unlike the first version. I made a handful of changes to progression and 
 behaviors to prevent softlocks/entering battles when Mario is alone. This mod should be entirely Practice Codes compatible. 
 
-Key Changes
+Key Changes:
 Mario cannot attack, be targeted, take other actions, take damage, be first struck, make first strikes, or do basically anything
 in battle. His turn is skipped in its entirety. For convenience I removed field hazard damage as well. Mario cannot be targeted
 by partner moves or items either.
