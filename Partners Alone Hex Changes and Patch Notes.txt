@@ -1,0 +1,210 @@
+TTYD PARTNER ONLY MOD — FINAL CONFIRMED PATCH LIST / v2.1+ NOTES
+
+NON-HEX / Magical Map tool changes:
+Mario: Cannot Take Actions, Mario's turn is functionally skipped.
+Mario: Never Targetable, Mario will never be attacked. This causes partners to take the full force of enemy attacks.
+Mario: No longer has "Is Leader" flag, causing Mario to no longer cause a game over when defeated.
+Mario: No longer takes damage from Field Hazards.
+Partners: Has "Is Leader" flag, this causes a game over to happen when the partner is defeated.
+Partner/Mario position switching disabled.
+Goombella: Tattle can be used infinitely in a turn, but no SP is gained.
+First Crump fake/tutorial Goombella unit_npc_christine: set invisible, part of the fix for Crump 1.
+
+rsh.rel - reenables the unused Power Punch event in the back train car
+000137A6: 70 6F 6C 79 53 75 72 66 61 63 65 37 30 32 5F 71 30 30 30 30 34
+000412F4: 00 1C 01 04 00 00 3C 9E
+
+main.dol — battle position swap: Mario in back and Partner in front
+003C3E9C: C2 C8 00 00 -> C3 0C 00 00 ; Mario X -100 -> -140
+003C3EA4: C0 A0 00 00 -> 40 A0 00 00 ; Mario Z -5 -> 5
+003CE6F8: C3 0C 00 00 -> C2 C8 00 00 ; Partner X -140 -> -100
+003CE6FC: 40 A0 00 00 -> C0 A0 00 00 ; Partner Z 5 -> -5
+
+main.dol — Btl_UnitSetup forced partner hook, used for first Crump and Doopliss rematch:
+000F5B40: 80 63 00 04 -> 4B F0 C4 50
+
+main.dol 00001F90:
+80 63 00 04 2C 03 00 00 40 82 00 28 80 9A 00 00 2C 04 00 01 40 82 00 1C 80 9A 00 04 80 84 00 00 80 84 00 00 2C 04 00 06 40 82 00 3C 38 60 00 E0 48 0F 3B 84
+
+main.dol 00001FF4:
+38 60 00 E4 48 0F 3B 4C
+
+Btl_UnitSetup hook logic:
+- if wParty != 0, keep vanilla
+- if enemy count != 1, keep vanilla
+- if one-enemy/no-partner and first enemy unit type is 0x06, force Goombella / 0xE0 for first Crump
+- otherwise, for one-enemy/no-partner non-Crump battles, force Vivian / 0xE4
+- confirmed: first Crump preserved, Doopliss rematch no longer instant-game-overs
+
+main.dol — remove Mario overworld first strikes:
+00111588: 90 83 00 08 -> 4B EF 0A 3C
+
+main.dol 00001FC4:
+2C 04 00 00 40 81 00 10 2C 04 00 06 41 81 00 08 38 80 00 00 90 83 00 08 4E 80 00 20
+
+Effect:
+- Mario first-strike values 1–6 become 0
+- partner first-strike values 7–8 remain intact
+- enemy first strikes remain intact
+
+main.dol — suppress Mario first-strike popup:
+0004829C: 4B FC 59 29 -> 4B FB 9D 45
+000482E8: 4B FC 58 DD -> 4B FB 9C F9
+
+main.dol 00001FE0:
+80 06 00 04 74 00 00 7E 41 82 00 08 4E 80 00 20 48 00 BB D4
+
+Effect:
+- Mario “You got a First Strike!” popup suppressed
+- partner/enemy first-strike popups preserved
+
+main.dol — enemy first strikes target active partner instead of Mario:
+000FBBA0: 7F 63 DB 78 -> 4B F0 64 74
+
+main.dol 00002014:
+7F 63 DB 78 48 0F 37 91 7C 7E 1B 78 7C 64 1B 78 7F 63 DB 78 48 0F 36 CD 2C 03 00 00 40 82 00 0C 7F C0 F3 78 48 0F 9B 74 7C 60 1B 78 48 0F 9B 6C
+
+Effect:
+- regular enemy first strikes target partner
+- scripted first Glitz Pit first strike targets partner
+- if no partner exists, fallback target is Mario
+
+gor.rel — first Crump tutorial Goombella text retargets:
+00064A74: FE 36 3C 83 -> FF FF FF FC
+00064A84: FE 36 3C 83 -> FF FF FF FC
+00064AA0: FE 36 3C 83 -> FF FF FF FC
+00064C60: FE 36 3C 83 -> FF FF FF FC ; mac_0_b_t1_003
+00064CFC: FE 36 3C 83 -> FF FF FF FC ; mac_0_b_t1_001
+00064D94: FE 36 3C 83 -> FF FF FF FC ; mac_0_b_t1_002
+
+Effect:
+- hidden/fake Goombella LW(3) text target becomes real/current partner -4
+- all remaining Crump dialogue issues confirmed fixed
+- leave 00064AC8 restored/unpatched as FE 36 3C 83
+
+jin.rel — disable old scripted Vivian duplicate spawn:
+0001CE0B: 03 -> 63
+
+Note:
+- Earlier test patch was 03 -> 01 to make scripted Vivian appear on turn 1.
+- Final setup forces Vivian through Btl_UnitSetup instead, so the scripted Vivian spawn should be disabled to avoid duplicate Vivian.
+- If updating from an older build with 0001CE0B already at 01, change 01 -> 63.
+
+jin.rel — Vivian scripted entrance position / Mario turn fixes, harmless if scripted spawn is disabled:
+0001CF64: FF FF FF 74 -> FF FF FF 9C ; Vivian scripted X -140 -> -100
+0001CF7C: FF FF FF 74 -> FF FF FF 9C ; Vivian scripted X -140 -> -100
+0001CF6C: 00 00 00 05 -> FF FF FF FB ; Vivian scripted Z 5 -> -5
+0001CF84: 00 00 00 05 -> FF FF FF FB ; Vivian scripted Z 5 -> -5
+0001CFCB: B4 -> 00 ; neutralize Mario turn
+0001D0DF: B4 -> 00 ; neutralize Mario turn-back
+
+jin.rel — Chapter 4 body-theft sequence:
+0000FBD3: C9 -> CB
+
+Effect:
+- body-theft path sets GSW(0) to 203 after the event
+
+main.dol — Chapter 4 jin_04 -> usu_00 route rewrite and usu_01 gate safety:
+000775EC: 90 0D 1A F4 -> 4B F8 A2 A4
+
+main.dol 00001890:
+90 0D 1A F4 7F A3 EB 78 3C 80 F5 DE 60 84 01 80 48 02 C9 C1 7C 67 1B 78 81 1D 00 9C 38 07 FF 34 28 00 00 01 41 81 00 30 39 48 15 E4 39 20 00 CE 91 2A 00 00 39 20 00 02 91 2A C9 B0 39 20 00 01 91 2A C9 B4 48 00 00 FC 60 00 00 00 60 00 00 00 60 00 00 00 7F A3 EB 78 3C 80 F5 DE 60 84 01 80 48 02 C9 71 7C 67 1B 78 48 00 00 14 60 00 00 00 60 00 00 00 60 00 00 00 60 00 00 00 2C 07 00 C8 40 82 00 C0 28 08 00 00 41 82 00 B8 81 28 00 00 81 49 00 00 3D 80 73 5F 61 8C 62 65 7C 0A 60 40 40 82 00 A0 81 49 00 04 3D 80 72 6F 61 8C 00 00 7C 0A 60 40 40 82 00 8C 81 28 00 28 81 49 00 00 3D 80 6A 69 61 8C 6E 5F 7C 0A 60 40 40 82 00 74 81 49 00 04 3D 80 30 30 61 8C 00 00 7C 0A 60 40 40 82 00 60 81 68 00 2C 81 4B 00 00 3D 80 6E 5F 61 8C 62 65 7C 0A 60 40 40 82 00 48 81 4B 00 04 3D 80 72 6F 61 8C 5F 32 7C 0A 60 40 40 82 00 34 3D 80 75 73 61 8C 75 5F 91 89 00 00 3D 80 30 30 61 8C 00 00 91 89 00 04 3D 80 65 5F 61 8C 62 65 91 8B 00 00 3D 80 72 6F 61 8C 00 00 91 8B 00 04 38 60 00 02 48 07 5C 1C
+
+Important final byte inside this hook:
+0000190F: CB -> C8 if updating from the older route-hook version
+
+Effect:
+- during natural jin_04 init, hook sees sequence 200 and rewrites s_bero destination to usu_00 / e_bero
+- after body-theft finishes, visible/current sequence is 203, but exit was already rewritten
+- entering usu_00 runs Vivian intro and advances to 204
+- usu_01 Twilight Trail gate stays locked/unopenable on 204 and 205
+- gate behaves normally again at 206+
+- if updating from an older gate version, make sure 000018BF is CE, not CD
+
+tou.rel — disable poisoned cake:
+0001376F: 03 -> 63
+
+Effect:
+- poisoned cake rank trigger changes from rank 3 to rank 99
+- normal/good cake still appears
+- poisoned cake no longer appears
+
+tou.rel — Glitz Pit rule behavior fixes, replacing bad rules with “Don’t use your jump”:
+000114E3: 06 -> 01
+000115AB: 06 -> 01
+000115F8: 00 00 00 40 00 00 00 FF 00 00 00 FF -> 00 00 00 01 00 00 00 01 00 00 00 01
+000116C3: 06 -> 01
+00011710: 00 00 00 40 00 00 00 FF 00 00 00 FF -> 00 00 00 01 00 00 00 01 00 00 00 01
+
+Effect:
+- “Use a special move at least once” behaves as “Don’t use your jump”
+- “Don’t ever let your partner attack” behaves as “Don’t use your jump”
+
+tou.rel — Glitz Pit rule text/message-ID fixes:
+00009951: 31 -> 30
+00009962: 38 -> 31
+00009A12: 39 -> 31
+00009A71: 31 -> 30
+00009A72: 39 -> 32
+00009A81: 32 -> 31
+00009A82: 33 -> 31
+00009BB1: 37 -> 36
+00009BB2: 31 -> 33
+00009BC2: 39 -> 31
+00009C31: 37 -> 36
+00009C32: 35 -> 33
+00009C41: 35 -> 34
+00009C42: 33 -> 31
+
+Effect:
+- Grubba/terminal/battle text now matches “Don’t use your jump”
+- sampled testing did not show the removed bad conditions on the field or in battle
+
+
+v2.2 Patch NOTES
+
+So it turns out the warp to Twilight Town from Doopliss' room still didn't work. I finally have it fixed for real this time... definitely.
+There is no chance it finds a way to stop working again.
+
+Changes:
+
+PATCH 1 — Disable old fragile room-init route rewrite check:
+main.dol
+0000190F: C7 or C8 -> FF
+
+Meaning:
+- Old route rewrite compare was previously sequence 199 or 200 during testing.
+- Changing the compare byte to FF makes that old route rewrite effectively never trigger.
+- This keeps the gate-safety logic intact while removing the bad room-init-based jin_04 redirect.
+
+PATCH 2 — Hook evt_bero_mapchange at actual mapchange time:
+main.dol
+00077B14: 7F E4 FB 78 -> 4B F8 9A 7C
+
+Meaning:
+- Replaces the original “mr r4, r31” setup before seqSetSeq with a branch to the new hook at 00001590.
+- This hook decides whether to keep the original map/bero or redirect to usu_00/e_bero.
+
+PATCH 3 — New evt_bero_mapchange hook body:
+main.dol
+00001590:
+90 61 00 08 93 E1 00 0C 7F A3 EB 78 3C 80 F5 DE 60 84 01 80 48 02 CC BD 2C 03 00 CB 40 82 00 6C 81 41 00 0C 81 6A 00 00 3D 80 6A 69 61 8C 6E 5F 7C 0B 60 40 40 82 00 54 81 6A 00 04 3D 80 30 30 7C 0B 60 40 40 82 00 44 81 41 00 08 81 6A 00 00 3D 80 6E 5F 61 8C 62 65 7C 0B 60 40 40 82 00 2C 81 6A 00 04 3D 80 72 6F 61 8C 5F 32 7C 0B 60 40 40 82 00 18 3C 80 80 00 60 84 46 2C 3C A0 80 00 60 A5 46 34 48 00 00 0C 80 81 00 0C 80 A1 00 08 38 60 00 03 48 02 9B F5 48 07 64 FC 75 73 75 5F 30 30 00 00 65 5F 62 65 72 6F 00 00
+
+Range used:
+main.dol 00001590–0000163B
+
+Hook logic:
+if GSW(0) == 203
+and destination map == "jin_00"
+and destination bero == "n_bero_2":
+    seqSetSeq(3, "usu_00", "e_bero")
+else:
+    seqSetSeq(3, original map, original bero)
+	
+	
+I was originally using evt_bero_get_info / room init for my jin_04 -> usu_00 warp, but that didn't properly catch it in real gameplay.
+The reason I missed it was because I was using practice code warps to the room, so on room init it was already realizing what sequence 
+I was at. The new hook uses evt_bero_mapchange, because that runs when the player actually takes the door/loading zone.
+This lets us check the current sequence at real map-change time, whereas the old was only on room init/load.
+
+I hope these are the final patch notes lmfao
