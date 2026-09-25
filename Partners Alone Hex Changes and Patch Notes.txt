@@ -1,6 +1,6 @@
-TTYD PARTNER ONLY MOD — FINAL CONFIRMED PATCH LIST / v2.1+ NOTES
+TTYD PARTNERS ALONE MOD
 
-NON-HEX / Magical Map tool changes:
+Magical Map modding tool changes:
 Mario: Cannot Take Actions, Mario's turn is functionally skipped.
 Mario: Never Targetable, Mario will never be attacked. This causes partners to take the full force of enemy attacks.
 Mario: No longer has "Is Leader" flag, causing Mario to no longer cause a game over when defeated.
